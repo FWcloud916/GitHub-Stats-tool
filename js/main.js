@@ -50,11 +50,18 @@ const stats = () => {
     'pullRequestTotal': 0
   };
 }
-
-let year = Date.parse('2019');
-const dateSelect = document.getElementById('selectDate');
-dateSelect.addEventListener('change', function () {
-  year = Date.parse(this.value);
+const timeZone = new Date();
+const cutSecond = timeZone.getTimezoneOffset() * 60 * 1000
+const daySecond = 24*60*60*1000;
+let statsDateStart = Date.parse('2019-01-01') + cutSecond;
+const dateSelectStart = document.getElementById('selectDateStart');
+dateSelectStart.addEventListener('change', function () {
+  statsDateStart = Date.parse(this.value) + cutSecond;
+})
+let statsDateEnd = timeZone.getTime();
+const dateSelectEnd = document.getElementById('selectDateEnd');
+dateSelectEnd.addEventListener('change', function () {
+  statsDateEnd = Date.parse(this.value) + cutSecond + daySecond;
 })
 
 const getdata = (owner = '', name = '', cursor = '', lastStats = stats()) => {
@@ -68,10 +75,8 @@ const getdata = (owner = '', name = '', cursor = '', lastStats = stats()) => {
       query: graphql(inputOwner, inputName, cursor)
     }
   }).then((result) => {
-    console.log(result.data)
     const dataset = result.data.data.repository.pullRequests;
     const statsResult = statsCollect(dataset, lastStats);
-    
     if (!statsResult.finish && statsResult.data.pageInfo.hasNextPage) {
       getdata(owner, name, statsResult.data.pageInfo.endCursor, statsResult.data.stats)
     } else {
@@ -80,7 +85,6 @@ const getdata = (owner = '', name = '', cursor = '', lastStats = stats()) => {
       document.querySelector('#displayResData h5').textContent = name;
       let data = '';
       Object.keys(statsData).forEach(key => {
-        console.log(statsData[key])
         if (typeof statsData[key] != 'object') {
           data += ` <h5 class="card-title">${key}</h5>
           <p class="card-text">${statsData[key]}</p>`
@@ -121,7 +125,8 @@ function statsCollect(dataset, lastStats = stats()) {
   const statsCollect = Object.assign({}, lastStats);
   const subset = dataset.nodes;
   subset.forEach((d) => {
-    if (Date.parse(d.createdAt) > year) {
+    const createdAtTime = Date.parse(d.createdAt) + cutSecond;
+    if (statsDateStart <= createdAtTime && createdAtTime <= statsDateEnd) {
       if (typeof (statsCollect.contributors[d.author.login]) == 'undefined') {
         statsCollect.contributors[d.author.login] = 0;
         statsCollect.contributors[d.author.login] = {
@@ -147,7 +152,7 @@ function statsCollect(dataset, lastStats = stats()) {
       statsCollect.reviews += d.reviews.totalCount;
       statsCollect.pullRequestTotal++;
     } else {
-      finish = true;
+      return;
     }
     if (!pageInfo.hasNextPage) {
       finish = true;
@@ -178,9 +183,7 @@ const github = {
       }
     }).then((res) => {
       github.token = token;
-      console.log(res.data.data);
       res.data.data.viewer.repositories.nodes.forEach(element => {
-        console.log();
         const option = document.createElement("option");
         option.text = element.nameWithOwner;
         option.value = element.nameWithOwner;
