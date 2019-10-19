@@ -30,6 +30,18 @@
       <input class="form-control" type="date" id="selectDateEnd">
     </div>
 
+    <div class="form-row">
+      <div class="col">
+          <label for="selectOwner">Owner</label>
+          <input class="form-control" type="text" id="selectOwner">
+      </div>
+      <div class="col">
+        <label for="selectRepoName">Repository Name</label>
+        <input class="form-control" type="text" id="selectRepoName">
+      </div>
+    </div>
+    <button id="inputSendRes" type='button' class="btn btn-primary mt-2" disabled>取得資料</button>
+
     <div class="form-group mt-3">
       <label for="selectRes">選擇 repository</label>
       <select id="selectRes" class="form-control"></select>
@@ -41,6 +53,8 @@
       </div>
     </div>
   </div>
+
+  
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>

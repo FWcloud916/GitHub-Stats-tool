@@ -204,6 +204,9 @@ const github = {
       const sendRes = document.getElementById("sendRes");
       sendRes.addEventListener('click', selectData);
       sendRes.disabled = false;
+      const inputSendRes = document.getElementById("inputSendRes");
+      inputSendRes.addEventListener('click', inputSelectData);
+      inputSendRes.disabled = false;
       if (repositories.pageInfo.hasNextPage) {
         github.login(repositories.pageInfo.endCursor);
       }
@@ -214,6 +217,14 @@ const github = {
   'reset': () => {
     document.getElementById("selectRes").innerHTML = '';
   },
+}
+
+function inputSelectData() {
+  const owner = document.getElementById('selectOwner').value;
+  const repo = document.getElementById('selectRepoName').value;
+  console.log(owner, repo);
+  getdata(owner, repo);
+
 }
 
 function selectData() {
