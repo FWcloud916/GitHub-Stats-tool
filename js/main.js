@@ -169,7 +169,8 @@ function statsCollect(dataset, lastStats = stats()) {
 const github = {
   'url': 'https://api.github.com/graphql',
   'token': '',
-  'login': () => {
+  'login': (cursor = '') => {
+    let after = cursor !== '' ? `, after: "${cursor}"` : '';
     const token = document.getElementById('token').value;
     axios({
       url: github.url,
@@ -177,18 +178,23 @@ const github = {
       headers: { 'Authorization': `token ${token}` },
       data: {
         query: `{
-                  viewer{
-                    repositories(first:100) {
-                      nodes{
-                        nameWithOwner
-                      }
+                viewer {
+                  repositories(first: 100, ${after}) {
+                    nodes {
+                      nameWithOwner
+                    }
+                    pageInfo{
+                      hasNextPage
+                      endCursor
                     }
                   }
-                }`
+                }
+              }`
       }
     }).then((res) => {
+      const repositories = res.data.data.viewer.repositories;
       github.token = token;
-      res.data.data.viewer.repositories.nodes.forEach(element => {
+      repositories.nodes.forEach(element => {
         const option = document.createElement("option");
         option.text = element.nameWithOwner;
         option.value = element.nameWithOwner;
@@ -198,10 +204,16 @@ const github = {
       const sendRes = document.getElementById("sendRes");
       sendRes.addEventListener('click', selectData);
       sendRes.disabled = false;
+      if (repositories.pageInfo.hasNextPage) {
+        github.login(repositories.pageInfo.endCursor);
+      }
     }).catch(function (error) {
       console.log(error);
     })
-  }
+  },
+  'reset': () => {
+    document.getElementById("selectRes").innerHTML = '';
+  },
 }
 
 function selectData() {
