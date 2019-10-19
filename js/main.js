@@ -42,6 +42,7 @@ const stats = () => {
     'comments': 0,
     'reviews': 0,
     'contributors': {},
+    'commits': 0,
     'codeChange': {
       'additions': 0,
       'deletions': 0,
@@ -107,6 +108,7 @@ const getdata = (owner = '', name = '', cursor = '', lastStats = stats()) => {
               additions: ${originData[key].codeChange.additions} <br>
               changedFiles: ${originData[key].codeChange.changedFiles} <br>
               deletions: ${originData[key].codeChange.deletions} <br>
+              commits: ${originData[key].codeChange.commits} <br>
               </p>
               </div>
             </div>`;
@@ -132,6 +134,7 @@ function statsCollect(dataset, lastStats = stats()) {
         statsCollect.contributors[d.author.login] = {
           'pullRequestTotal': 0,
           'codeChange': {
+            'commits': 0,
             'additions': 0,
             'deletions': 0,
             'changedFiles': 0
@@ -148,6 +151,8 @@ function statsCollect(dataset, lastStats = stats()) {
         statsCollect.contributors[d.author.login].codeChange.deletions += commitSet.commit.deletions;
         statsCollect.contributors[d.author.login].codeChange.changedFiles += commitSet.commit.changedFiles;
       })
+      statsCollect.commits += d.commits.totalCount;
+      statsCollect.contributors[d.author.login].codeChange.commits += d.commits.totalCount;
       statsCollect.comments += d.comments.totalCount;
       statsCollect.reviews += d.reviews.totalCount;
       statsCollect.pullRequestTotal++;
